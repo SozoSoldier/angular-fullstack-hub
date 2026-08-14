@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  backend-api:
+    container_name: portfolio-backend-api
+    build:
+      context: "./DemoApp.Api"
+      dockerfile: "Dockerfile.api"
+    ports:
+      - "5165:8080"
+    volumes:
+      - portfolio-db-volume:/root # Mounts our safe database directory to persist data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - fullstack-network
+
+  frontend-client:
+    container_name: portfolio-frontend-client
+    build:
+      context: "./DemoApp-Client"
+      dockerfile: "Dockerfile.client"
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend-api
+    networks:
+      - fullstack-network
+
+volumes:
+  portfolio-db-volume: # Safe, dedicated volume segment
+
+networks:
+  fullstack-network:
+    driver: bridge

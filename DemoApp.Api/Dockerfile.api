@@ -1,0 +1,21 @@
+# Stage 1: Build the backend project using the official lightweight SDK
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Copy project specification files and restore dependencies
+COPY ["DemoApp.Api.csproj", "./"]
+RUN dotnet restore "DemoApp.Api.csproj"
+
+# Build a release package
+COPY . .
+RUN dotnet publish "DemoApp.Api.csproj" -c Release -o /app/publish
+
+# Stage 2: Serve the binary via the small runtime mirror
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+ENTRYPOINT ["dotnet", "DemoApp.Api.dll"]
