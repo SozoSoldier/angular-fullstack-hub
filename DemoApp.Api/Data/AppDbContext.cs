@@ -19,7 +19,8 @@ public class AppDbContext : DbContext
         }
     }
 
-    protected override void OnModelCreating(ModelCreatingModelBuilder modelBuilder)
+    // FIXED: Changed type parameter from ModelCreatingModelBuilder to ModelBuilder
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
