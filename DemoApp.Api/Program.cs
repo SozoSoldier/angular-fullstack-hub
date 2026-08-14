@@ -1,4 +1,5 @@
 using DemoApp.Api; // Required to discover your AppDbContext class
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore; // Required for .UseSqlServer() extension
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,10 +11,15 @@ builder.Services.AddCors(options =>
     );
 });
 
-// Changed .UseSqlServer to .UseSqlite
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+// 1. Create and maintain a single master connection to preserve the memory space
+var masterConnection = new SqliteConnection(
+    "Data Source=InMemoryPortfolioDb;Mode=Memory;Cache=Shared"
 );
+masterConnection.Open();
+
+// 2. Register the DbContext using our active master connection
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(masterConnection));
+
 builder.Services.AddControllers();
 
 // Tells .NET Dependency Injection to hand over a ProductRepository whenever IProductRepository is requested
@@ -26,25 +32,15 @@ app.UseCors("AllowAngular");
 app.UseAuthorization();
 app.MapControllers();
 
-// NEW ARCHITECTURE ADDITION: Automatic Container Database Initializer & Migration Runner
+// 3. Ensure the initial database schemas and seed records are pushed into RAM
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        // Automatically creates inventory.db and applies your tables (Product, Soft Delete columns, etc.)
-        await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.MigrateAsync(
-            context.Database
-        );
-        System.Console.WriteLine(
-            "[Docker Initializer]: SQLite Database tables synced successfully."
-        );
-    }
-    catch (System.Exception ex)
-    {
-        System.Console.WriteLine($"[Docker Initializer Error]: Database sync failed: {ex.Message}");
-    }
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // EnsureCreated handles both table initialization and data seeding automatically
+    await context.Database.EnsureCreatedAsync();
+    System.Console.WriteLine(
+        "[Render Initializer]: In-Memory SQLite database initialized and seeded."
+    );
 }
 
 app.Run();
