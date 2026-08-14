@@ -2,12 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy project specification files and restore dependencies
-COPY ["DemoApp.Api.csproj", "./"]
-RUN dotnet restore "DemoApp.Api.csproj"
+# FIXED FOR CLOUD DEPLOYMENT: Explicitly pull project files from the subfolder
+COPY ["DemoApp.Api/DemoApp.Api.csproj", "DemoApp.Api/"]
+RUN dotnet restore "DemoApp.Api/DemoApp.Api.csproj"
 
-# Build a release package
-COPY . .
+# Copy the rest of the backend files and publish a compiled release bundle
+COPY DemoApp.Api/ DemoApp.Api/
+WORKDIR "/src/DemoApp.Api"
 RUN dotnet publish "DemoApp.Api.csproj" -c Release -o /app/publish
 
 # Stage 2: Serve the binary via the small runtime mirror
