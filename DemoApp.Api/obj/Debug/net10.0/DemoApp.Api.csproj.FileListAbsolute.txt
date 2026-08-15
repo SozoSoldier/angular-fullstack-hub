@@ -190,3 +190,4 @@ C:\Users\Josh Snyder\Angular Test Apps\PortfolioDemo\DemoApp.Api\obj\Debug\net10
 C:\Users\Josh Snyder\Angular Test Apps\PortfolioDemo\DemoApp.Api\obj\Debug\net10.0\DemoApp.Api.pdb
 C:\Users\Josh Snyder\Angular Test Apps\PortfolioDemo\DemoApp.Api\obj\Debug\net10.0\DemoApp.Api.genruntimeconfig.cache
 C:\Users\Josh Snyder\Angular Test Apps\PortfolioDemo\DemoApp.Api\obj\Debug\net10.0\ref\DemoApp.Api.dll
+C:\Users\Josh Snyder\Angular Test Apps\PortfolioDemo\DemoApp.Api\obj\Debug\net10.0\DemoApp.Api.sourcelink.json
