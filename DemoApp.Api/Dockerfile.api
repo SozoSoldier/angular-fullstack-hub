@@ -16,7 +16,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+# FIXED FOR RENDER: Remove hardcoded 8080 environment variables.
+# This forces ASP.NET Core to automatically look for and bind to Render's dynamic $PORT variable instead.
+ENV ASPNETCORE_URLS=http://+:10000
 
 ENTRYPOINT ["dotnet", "DemoApp.Api.dll"]
