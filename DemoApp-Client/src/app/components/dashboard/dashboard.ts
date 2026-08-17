@@ -109,7 +109,6 @@ import { ProductService, Product } from '../../services/product';
                   <button
                     type="submit"
                     class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
-                    [disabled]="editForm.invalid || editForm.pristine"
                   >
                     Save
                   </button>
@@ -240,7 +239,6 @@ import { ProductService, Product } from '../../services/product';
               <button
                 type="submit"
                 class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
-                [disabled]="productForm.invalid || productForm.pristine"
               >
                 Save Item
               </button>
