@@ -1,4 +1,4 @@
-using DemoApp.Api; // Required to discover your AppDbContext class
+using DemoApp.Api; // Required to discover the AppDbContext class
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore; // Required for .UseSqlServer() extension
 

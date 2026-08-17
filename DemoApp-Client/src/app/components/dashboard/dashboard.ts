@@ -20,7 +20,7 @@ import { ProductService, Product } from '../../services/product';
             Inventory Management
           </h2>
           <p class="mt-1 text-sm text-slate-500">
-            Live catalog synced with your enterprise ASP.NET Core Web API database layer.
+            Live catalog synced with the enterprise ASP.NET Core Web API database layer.
           </p>
         </div>
         <div class="mt-4 md:mt-0 md:ml-4 shrink-0">

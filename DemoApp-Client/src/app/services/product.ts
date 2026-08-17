@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-// Strong TypeScript type model matching your C# domain entity
 export interface Product {
   id?: number; // Optional because the SQLite database generates this automatically
   name: string;
@@ -33,7 +32,7 @@ export class ProductService {
     pageSize: number = 6,
     search: string = '',
   ): Observable<PagedResult<Product>> {
-    // Appends safe query strings to your proxy path route automatically
+    // Appends safe query strings to the proxy path route automatically
     return this.http.get<PagedResult<Product>>(
       `/api/products?page=${page}&pageSize=${pageSize}&search=${search}`,
     );
@@ -41,7 +40,7 @@ export class ProductService {
 
   /**
    * Sends a POST request containing the new item payload
-   * @param product The object coming straight from your Reactive Form values
+   * @param product The object coming straight from the Reactive Form values
    */
   createProduct(product: Product): Observable<Product> {
     return this.http.post<Product>('/api/products', product);

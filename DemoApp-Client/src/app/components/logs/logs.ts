@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Audit Security Logs</h2>
       <p class="text-sm text-slate-500 mt-1">
-        Immutable tracking log monitoring your custom C# header token pipeline handshakes.
+        Immutable tracking log monitoring the custom C# header token pipeline handshakes.
       </p>
 
       <div class="mt-6 overflow-hidden bg-white shadow-sm border border-slate-200 rounded-2xl">

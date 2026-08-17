@@ -17,7 +17,7 @@ public class AnalyticsController : ControllerBase
     [HttpGet("summary")]
     public async Task<ActionResult<InventorySummaryDto>> GetSummary()
     {
-        // Calculate live metrics directly from your SQLite dataset via LINQ
+        // Calculate live metrics directly from the SQLite dataset via LINQ
         var totalValuation = await _context.Products.SumAsync(p => p.Price);
         var uniqueCount = await _context.Products.CountAsync(p => p.IsDeleted == false);
 

@@ -1,2 +1,2 @@
 @import 'tailwindcss';
-@source "./app"; /* Directs Tailwind v4 to look for styles inside your child route subfolders */
+@source "./app"; /* Directs Tailwind v4 to look for styles inside the child route subfolders */
