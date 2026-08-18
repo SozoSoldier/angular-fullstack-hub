@@ -3,6 +3,17 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore; // Required for .UseSqlServer() extension
 
 var builder = WebApplication.CreateBuilder(args);
+
+// FIXED FOR CLOUD INOTIFY ERROR: Tells .NET to load configuration snapshots
+// into memory statically rather than standing up heavy file-watching tracking streams.
+builder
+    .Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+    .AddJsonFile(
+        $"appsettings.{builder.Environment.EnvironmentName}.json",
+        optional: true,
+        reloadOnChange: false
+    );
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
