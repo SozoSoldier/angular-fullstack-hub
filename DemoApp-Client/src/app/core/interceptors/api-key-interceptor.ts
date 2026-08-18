@@ -42,6 +42,8 @@ export const apiKeyInterceptor: HttpInterceptorFn = (req, next) => {
         friendlyMessage = 'The requested database item could not be found.';
       } else if (error.status === 500) {
         friendlyMessage = 'Internal Server Error: The backend database crashed.';
+      } else if (error.status === 502 || error.status === 0) {
+        friendlyMessage = 'Cold Start Sleep Detected on Backend Upstream.';
       }
 
       console.error(`[Global Error Interceptor Handled]: ${friendlyMessage}`, error);

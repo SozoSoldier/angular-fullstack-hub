@@ -9,6 +9,40 @@ import { ProductService, Product } from '../../services/product';
   imports: [CommonModule, CurrencyPipe, ReactiveFormsModule],
   template: `
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <!-- NEW FEATURE: Cold Start/Sleeping Backend Warning Callout Banner -->
+      @if (isBackendSleeping()) {
+        <div
+          class="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm animate-fade"
+        >
+          <div class="flex items-start space-x-3">
+            <span class="text-xl">⏳</span>
+            <div>
+              <h4 class="text-base font-bold text-amber-900">Cloud Database Engine is Sleeping</h4>
+              <p class="mt-1 text-sm text-amber-700 max-w-2xl leading-relaxed">
+                To keep this portfolio app 100% free, Render puts the backend server container to
+                sleep after 15 minutes of inactivity. The front end tried to fetch data, but the API
+                needs about 50 seconds to complete its cold-start boot cycle and re-seed the tables.
+              </p>
+              <div class="mt-4">
+                <!-- Direct clickable wake up hook -->
+                <a
+                  href="https://demo-portfolio-api.onrender.com/api/products"
+                  target="_blank"
+                  (click)="onWakeUpClicked()"
+                  class="inline-flex items-center rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-500 transition-all cursor-pointer"
+                >
+                  Click Here to Wake Up Backend API
+                </a>
+                <p class="mt-1.5 text-xs text-amber-500 italic">
+                  *A new tab will open. Once you see the "API Key was not provided" message, close
+                  it and refresh this page!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Dashboard Title Block with Action Button -->
       <div
         class="md:flex md:items-center md:justify-between mb-6 pb-4 border-b border-slate-200/60"
@@ -258,6 +292,9 @@ export class DashboardComponent implements OnInit {
   isModalOpen = signal<boolean>(false);
   editingProductId = signal<number | null>(null);
 
+  // NEW SIGNAL: Track cloud service sleep markers
+  isBackendSleeping = signal<boolean>(false);
+
   // Pagination and search parameters signals
   currentPage = signal<number>(1);
   pageSize = signal<number>(6); // Limits view layout grid to exactly 6 items max per view
@@ -280,10 +317,26 @@ export class DashboardComponent implements OnInit {
         next: (result) => {
           this.products.set(result.items);
           this.totalPages.set(result.totalPages || 1);
+          this.isBackendSleeping.set(false); // Clear warning on healthy connection
           this.isLoading.set(false);
         },
-        error: () => this.isLoading.set(false),
+        error: (err) => {
+          // FIXED FOR CLOUD: If a 502 Bad Gateway or 0 Connection Timeout triggers, fire alert
+          if (err.status === 502 || err.status === 0) {
+            this.isBackendSleeping.set(true);
+          }
+          this.isLoading.set(false);
+        },
       });
+  }
+
+  onWakeUpClicked(): void {
+    // Automatically swap loading state animation loops while user initiates wake-up call in secondary tab
+    this.isLoading.set(true);
+    // Poll the backend again automatically in 45 seconds to refresh the grid layout
+    setTimeout(() => {
+      this.loadProducts();
+    }, 45000);
   }
 
   onSearchChange(event: Event): void {
