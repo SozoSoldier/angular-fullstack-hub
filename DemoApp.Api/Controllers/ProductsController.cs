@@ -35,6 +35,11 @@ public class ProductsController : ControllerBase
         }
 
         await _repo.AddAsync(product);
+        await _repo.AddAuditLogAsync(
+            "PRODUCT_CREATED",
+            $"New inventory product cataloged: Name='{product.Name}', Price=${product.Price}",
+            "Admin User"
+        );
         await _repo.SaveChangesAsync();
         return CreatedAtAction(nameof(GetAll), new { id = product.Id }, product);
     }
@@ -62,6 +67,11 @@ public class ProductsController : ControllerBase
         product.Price = updatedProduct.Price;
 
         await _repo.UpdateAsync(product);
+        await _repo.AddAuditLogAsync(
+            "PRODUCT_UPDATED",
+            $"Inventory parameters modified for ID #{id}: Revised fields submitted successfully.",
+            "Admin User"
+        );
         await _repo.SaveChangesAsync();
         return NoContent();
     }
@@ -76,7 +86,19 @@ public class ProductsController : ControllerBase
         }
 
         product.IsDeleted = true; // Flag for our Soft Delete
+        await _repo.AddAuditLogAsync(
+            "PRODUCT_DELETED",
+            $"Soft deletion executed successfully on product ID #{id}. Access flag revoked.",
+            "Admin User"
+        );
         await _repo.SaveChangesAsync();
         return NoContent();
+    }
+
+    [HttpGet("audit-logs")]
+    public async Task<ActionResult<List<AuditLog>>> GetLogs()
+    {
+        var logs = await _repo.GetAuditLogsAsync();
+        return Ok(logs);
     }
 }

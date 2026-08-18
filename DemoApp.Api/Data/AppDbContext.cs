@@ -10,6 +10,8 @@ public class AppDbContext : DbContext
     // .NET will automatically find the Product class if it's in the same project assembly
     public DbSet<Product> Products => Set<Product>();
 
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -48,6 +50,29 @@ public class AppDbContext : DbContext
                     Name = "Cat6A Shielded Cable (1000ft)",
                     Price = 125.00m,
                     IsDeleted = false,
+                }
+            );
+
+        // NEW SEED DATA: Pre-populates default system startup logs
+        modelBuilder
+            .Entity<AuditLog>()
+            .HasData(
+                new AuditLog
+                {
+                    Id = 1,
+                    Action = "SYSTEM_STARTUP",
+                    Description =
+                        "In-Memory database container initialized and tables scaffolded successfully.",
+                    PerformedBy = "Kernel Engine",
+                    Timestamp = DateTime.UtcNow.AddMinutes(-5),
+                },
+                new AuditLog
+                {
+                    Id = 2,
+                    Action = "SEED_DATA",
+                    Description = "Default core network products seeded into active memory caches.",
+                    PerformedBy = "Database Initializer",
+                    Timestamp = DateTime.UtcNow.AddMinutes(-4),
                 }
             );
     }

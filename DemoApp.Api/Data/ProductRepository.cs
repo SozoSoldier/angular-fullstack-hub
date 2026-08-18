@@ -52,6 +52,24 @@ public class ProductRepository : IProductRepository
         _context.Entry(product).State = EntityState.Modified;
     }
 
+    public async Task AddAuditLogAsync(string action, string description, string user)
+    {
+        var log = new AuditLog
+        {
+            Action = action,
+            Description = description,
+            PerformedBy = user,
+            Timestamp = DateTime.UtcNow,
+        };
+        await _context.AuditLogs.AddAsync(log);
+    }
+
+    public async Task<List<AuditLog>> GetAuditLogsAsync()
+    {
+        // Returns logs sorted with the newest entries at the very top of the list
+        return await _context.AuditLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

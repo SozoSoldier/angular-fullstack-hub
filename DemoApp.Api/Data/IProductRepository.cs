@@ -7,5 +7,7 @@ public interface IProductRepository
     Task<Product?> GetByIdAsync(int id);
     Task AddAsync(Product product);
     Task UpdateAsync(Product product);
+    Task AddAuditLogAsync(string action, string description, string user);
+    Task<List<AuditLog>> GetAuditLogsAsync(); // To pull logs out to the UI later
     Task SaveChangesAsync();
 }
