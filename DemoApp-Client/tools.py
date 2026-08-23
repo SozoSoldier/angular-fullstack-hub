@@ -33,3 +33,31 @@ def run_ng_command(command: str) -> str:
         return result.stdout if result.stdout else "Command executed successfully with no output."
     except subprocess.CalledProcessError as e:
         return f"CLI Error: {e.stderr if e.stderr else e.stdout}"
+        
+@tool
+def create_git_branch(branch_name: str) -> str:
+    """Creates and switches to a new Git branch for the agent's work. 
+    Accepts an alphanumeric string using dashes (e.g., 'feat-user-profile')."""
+    # Clean the branch name slightly to prevent syntax breaks
+    clean_name = branch_name.strip().replace(" ", "-").lower()
+    try:
+        # Check if we are in a git repository
+        subprocess.run("git status", shell=True, capture_output=True, check=True)
+        # Create and checkout the branch
+        result = subprocess.run(f"git checkout -b {clean_name}", shell=True, capture_output=True, text=True, check=True)
+        return f"Successfully created and switched to branch: {clean_name}"
+    except subprocess.CalledProcessError as e:
+        return f"Git Error: Ensure you are in a initialized Git repo. Details: {e.stderr}"
+
+@tool
+def commit_all_changes(commit_message: str) -> str:
+    """Stages all workspace changes and commits them to the current Git branch."""
+    try:
+        # Stage everything
+        subprocess.run("git add .", shell=True, capture_output=True, check=True)
+        # Commit
+        result = subprocess.run(f'git commit -m "{commit_message}"', shell=True, capture_output=True, text=True, check=True)
+        return f"Successfully committed changes with message: '{commit_message}'"
+    except subprocess.CalledProcessError as e:
+        return f"Git Commit Error: {e.stderr if e.stderr else 'No changes to commit or git not configured.'}"
+
