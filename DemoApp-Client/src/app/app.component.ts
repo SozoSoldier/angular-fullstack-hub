@@ -2,11 +2,12 @@ import { Component, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
+import { FooterComponent } from './footer/footer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FooterComponent],
   template: `
     <!-- 1. Check if the user is logged in using our authentication signal -->
     @if (authService.isAuthenticated()) {
@@ -27,7 +28,6 @@ import { AuthService } from './services/auth';
             </div>
 
             <!-- NAVIGATION INTERACTIVE LINK MODULES -->
-            <!-- routerLinkActive automatically applies active CSS classes to the selected route -->
             <nav class="mt-6 px-4 space-y-1">
               <a
                 routerLink="/dashboard"
@@ -44,6 +44,22 @@ import { AuthService } from './services/auth';
                   />
                 </svg>
                 Inventory System
+              </a>
+
+              <a
+                routerLink="/products"
+                routerLinkActive="bg-slate-800 text-white font-semibold border-l-4 border-indigo-500"
+                class="flex items-center px-4 py-3 rounded-lg hover:bg-slate-800/60 hover:text-white transition-all cursor-pointer"
+              >
+                <svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+                Product Catalogue
               </a>
 
               <a
@@ -111,13 +127,21 @@ import { AuthService } from './services/auth';
         </aside>
 
         <!-- MAIN DYNAMIC CONTENT ROUTER INJECTOR VIEWPORT -->
-        <div class="flex-1 overflow-y-auto">
-          <router-outlet></router-outlet>
+        <div class="flex-1 overflow-y-auto flex flex-col min-h-screen">
+          <div class="flex-1">
+            <router-outlet></router-outlet>
+          </div>
+          <app-footer></app-footer>
         </div>
       </div>
     } @else {
-      <!-- Unauthenticated State (Login Screen renders purely full-viewport size here) -->
-      <router-outlet></router-outlet>
+      <!-- Unauthenticated State -->
+      <div class="min-h-screen flex flex-col">
+        <div class="flex-1">
+          <router-outlet></router-outlet>
+        </div>
+        <app-footer></app-footer>
+      </div>
     }
   `,
 })
