@@ -27,23 +27,29 @@ export interface FooterSection {
       <!-- Main Content Container -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          
           <!-- Brand Column -->
           <div class="space-y-4 md:col-span-1">
             <div class="flex items-center space-x-3">
-              <div class="h-9 w-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+              <div
+                class="h-9 w-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md"
+              >
                 F
               </div>
               <span class="text-xl font-bold text-white tracking-tight">Full-Stack Hub</span>
             </div>
             <p class="text-sm text-slate-400 leading-relaxed">
-              Empowering real-time analytics, secure auditing, and modern enterprise inventory management.
+              Empowering real-time analytics, secure auditing, and modern enterprise inventory
+              management.
             </p>
-            
+
             <!-- System Status Indicator (Signal-driven state) -->
-            <div class="inline-flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full text-xs text-emerald-400 border border-slate-700/60">
+            <div
+              class="inline-flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full text-xs text-emerald-400 border border-slate-700/60"
+            >
               <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                ></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span class="font-medium text-slate-200">Systems Operational</span>
@@ -72,28 +78,41 @@ export interface FooterSection {
               </ul>
             </div>
           }
-
         </div>
 
         <!-- Divider line -->
-        <div class="mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          
+        <div
+          class="mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
           <!-- Copyright Info using Angular Signal -->
           <div class="flex items-center space-x-2 text-xs sm:text-sm text-slate-400">
-            <svg class="h-4 w-4 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              class="h-4 w-4 text-indigo-400 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <span>
-              &copy; <span class="font-semibold text-white">{{ currentYear() }}</span> Full-Stack Hub, Inc. All rights reserved.
+              &copy; <span class="font-semibold text-white">{{ currentYear() }}</span> Full-Stack
+              Hub, Inc. All rights reserved.
             </span>
           </div>
 
           <!-- Quick Actions & Links -->
-          <div class="flex items-center space-x-6 text-xs text-slate-400">
+          <div
+            class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-400 sm:justify-end"
+          >
             <a href="#privacy" class="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#terms" class="hover:text-white transition-colors">Terms of Service</a>
             <a href="#cookies" class="hover:text-white transition-colors">Cookie Preferences</a>
-            
+
             <!-- Signal year update status indicator / simulation control -->
             <button
               type="button"
@@ -105,7 +124,6 @@ export interface FooterSection {
             </button>
           </div>
         </div>
-
       </div>
     </footer>
   `,

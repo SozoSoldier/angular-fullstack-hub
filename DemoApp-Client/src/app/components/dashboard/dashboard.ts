@@ -209,23 +209,25 @@ import { ToastService } from '../../services/toast';
       </div>
 
       <!-- NEW FEATURE: Responsive Footer Pagination Controller Module -->
-      <div class="mt-8 flex items-center justify-between border-t border-slate-200 pt-6">
+      <div
+        class="mt-8 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div class="text-sm text-slate-500">
           Showing page <span class="font-semibold text-slate-900">{{ currentPage() }}</span> of
           <span class="font-semibold text-slate-900">{{ totalPages() }}</span>
         </div>
-        <div class="flex space-x-2">
+        <div class="flex w-full space-x-2 sm:w-auto">
           <button
             (click)="goToPage(currentPage() - 1)"
             [disabled]="currentPage() === 1"
-            class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            class="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer sm:flex-none sm:px-4"
           >
             &larr; Previous
           </button>
           <button
             (click)="goToPage(currentPage() + 1)"
             [disabled]="currentPage() >= totalPages()"
-            class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            class="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer sm:flex-none sm:px-4"
           >
             Next &rarr;
           </button>

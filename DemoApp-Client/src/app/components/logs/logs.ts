@@ -20,8 +20,8 @@ import { ProductService } from '../../services/product';
       </div>
 
       <!-- Live Dynamic Log Feed Table Container -->
-      <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-[40rem] divide-y divide-slate-200 text-left text-sm">
           <thead class="bg-slate-50 font-semibold text-slate-700">
             <tr>
               <th class="px-6 py-3.5">Timestamp</th>

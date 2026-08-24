@@ -10,7 +10,7 @@ import { ToastService } from '../services/toast';
   template: `
     @if (toastService.toast(); as currentToast) {
       <div
-        class="fixed bottom-5 right-5 z-50 max-w-md w-full sm:w-auto min-w-[320px] p-4 rounded-xl shadow-2xl border flex items-center justify-between gap-4 transition-all duration-300"
+        class="fixed bottom-4 left-4 right-4 z-50 flex w-auto max-w-md items-center justify-between gap-4 rounded-xl border p-4 shadow-2xl transition-all duration-300 sm:bottom-5 sm:left-auto sm:right-5 sm:w-auto"
         [ngClass]="{
           'bg-emerald-900/95 text-emerald-100 border-emerald-700 shadow-emerald-950/20':
             currentToast.type === 'success',

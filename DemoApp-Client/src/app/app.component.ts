@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
@@ -20,10 +20,79 @@ import { ToastComponent } from './toast/toast.component';
     <app-toast></app-toast>
     <!-- 1. Check if the user is logged in using our authentication signal -->
     @if (authService.isAuthenticated()) {
-      <div class="min-h-screen bg-slate-50 flex">
+      <div class="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
+        <!-- Mobile navigation header -->
+        <header
+          class="flex h-16 items-center justify-between bg-slate-900 px-4 text-white lg:hidden"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 font-bold"
+            >
+              F
+            </div>
+            <span class="text-base font-bold tracking-tight">Full-Stack Hub</span>
+          </div>
+          <button
+            type="button"
+            (click)="mobileMenuOpen.set(!mobileMenuOpen())"
+            class="rounded-lg p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
+            [attr.aria-expanded]="mobileMenuOpen()"
+            aria-label="Toggle navigation menu"
+          >
+            @if (mobileMenuOpen()) {
+              <span class="text-2xl leading-none">&times;</span>
+            } @else {
+              <span class="text-2xl leading-none">&#9776;</span>
+            }
+          </button>
+        </header>
+
+        @if (mobileMenuOpen()) {
+          <div
+            class="fixed inset-0 z-40 bg-slate-950/50 lg:hidden"
+            (click)="mobileMenuOpen.set(false)"
+          ></div>
+          <nav
+            class="absolute left-0 right-0 top-16 z-50 bg-slate-900 px-4 pb-4 shadow-xl lg:hidden"
+          >
+            <a
+              routerLink="/dashboard"
+              (click)="closeMobileMenu()"
+              class="flex items-center rounded-lg px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >Inventory System</a
+            >
+            <a
+              routerLink="/products"
+              (click)="closeMobileMenu()"
+              class="flex items-center rounded-lg px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >Product Catalogue</a
+            >
+            <a
+              routerLink="/analytics"
+              (click)="closeMobileMenu()"
+              class="flex items-center rounded-lg px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >Live Analytics Hub</a
+            >
+            <a
+              routerLink="/logs"
+              (click)="closeMobileMenu()"
+              class="flex items-center rounded-lg px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >Audit Security Logs</a
+            >
+            <button
+              type="button"
+              (click)="onLogout()"
+              class="mt-2 w-full rounded-lg border-t border-slate-800 px-4 py-3 text-left text-slate-400 hover:bg-slate-800 hover:text-white"
+            >
+              Sign out
+            </button>
+          </nav>
+        }
+
         <!-- SIDEBAR NAVIGATION CONTAINER -->
         <aside
-          class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 shrink-0"
+          class="hidden w-64 shrink-0 flex-col justify-between border-r border-slate-800 bg-slate-900 text-slate-300 lg:flex"
         >
           <div>
             <!-- Sidebar Header Title / Brand Logo -->
@@ -136,7 +205,7 @@ import { ToastComponent } from './toast/toast.component';
         </aside>
 
         <!-- MAIN DYNAMIC CONTENT ROUTER INJECTOR VIEWPORT -->
-        <div class="flex-1 overflow-y-auto flex flex-col min-h-screen">
+        <div class="flex min-h-screen min-w-0 flex-1 flex-col overflow-y-auto">
           <div class="flex-1">
             <router-outlet></router-outlet>
           </div>
@@ -157,8 +226,14 @@ import { ToastComponent } from './toast/toast.component';
 export class AppComponent {
   authService = inject(AuthService);
   private router = inject(Router);
+  mobileMenuOpen = signal(false);
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
 
   onLogout(): void {
+    this.closeMobileMenu();
     this.authService.logout();
     this.router.navigate(['/login']);
   }
