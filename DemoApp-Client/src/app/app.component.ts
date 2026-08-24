@@ -3,12 +3,21 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
 import { FooterComponent } from './footer/footer.component';
+import { ToastComponent } from './toast/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FooterComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    FooterComponent,
+    ToastComponent,
+  ],
   template: `
+    <app-toast></app-toast>
     <!-- 1. Check if the user is logged in using our authentication signal -->
     @if (authService.isAuthenticated()) {
       <div class="min-h-screen bg-slate-50 flex">

@@ -29,10 +29,20 @@ def run_ng_command(command: str) -> str:
     if not (command.strip().startswith("ng ") or command.strip().startswith("npm ")):
         return "Error: Only 'ng' or 'npm' commands are allowed for workspace safety."
     try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        # UPGRADE: Added encoding='utf-8' to prevent Windows cp1252 decode crashes
+        result = subprocess.run(
+            command, 
+            shell=True, 
+            capture_output=True, 
+            text=True, 
+            encoding='utf-8', 
+            check=True
+        )
         return result.stdout if result.stdout else "Command executed successfully with no output."
     except subprocess.CalledProcessError as e:
+        # UPGRADE: Ensure error streams are also captured cleanly in UTF-8
         return f"CLI Error: {e.stderr if e.stderr else e.stdout}"
+
         
 @tool
 def create_git_branch(branch_name: str) -> str:
@@ -60,4 +70,25 @@ def commit_all_changes(commit_message: str) -> str:
         return f"Successfully committed changes with message: '{commit_message}'"
     except subprocess.CalledProcessError as e:
         return f"Git Commit Error: {e.stderr if e.stderr else 'No changes to commit or git not configured.'}"
+        
+@tool
+def modify_file_text(file_path: str, search_string: str, replace_string: str) -> str:
+    """Safely updates specific blocks of code inside a file by swapping a target search string with a new replacement string."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            file_content = f.read()
+        
+        if search_string not in file_content:
+            return f"Modification Error: Could not find the exact text block '{search_string}' inside {file_path}."
+        
+        # Perform clean string swap
+        updated_content = file_content.replace(search_string, replace_string)
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(updated_content)
+            
+        return f"Successfully updated text block in {file_path}."
+    except Exception as e:
+        return f"Error modifying file: {str(e)}"
+
 

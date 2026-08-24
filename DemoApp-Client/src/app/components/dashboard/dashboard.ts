@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService, Product } from '../../services/product';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-dashboard',
@@ -286,6 +287,7 @@ import { ProductService, Product } from '../../services/product';
 export class DashboardComponent implements OnInit {
   private productService = inject(ProductService);
   private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
 
   products = signal<Product[]>([]);
   isLoading = signal<boolean>(true);
@@ -379,8 +381,10 @@ export class DashboardComponent implements OnInit {
     this.productService.updateProduct(id, this.editForm.value).subscribe({
       next: () => {
         this.cancelEdit();
+        this.toastService.success('Product updated successfully.');
         this.loadProducts();
       },
+      error: () => this.toastService.error('Unable to update product.'),
     });
   }
   onSubmit(): void {
@@ -388,13 +392,21 @@ export class DashboardComponent implements OnInit {
     this.productService.createProduct(this.productForm.value).subscribe({
       next: () => {
         this.closeModal();
+        this.toastService.success('Product added successfully.');
         this.loadProducts();
       },
+      error: () => this.toastService.error('Unable to add product.'),
     });
   }
   onDelete(id: number | undefined): void {
     if (!id || !confirm('Remove item?')) return;
-    this.productService.deleteProduct(id).subscribe({ next: () => this.loadProducts() });
+    this.productService.deleteProduct(id).subscribe({
+      next: () => {
+        this.toastService.success('Product deleted successfully.');
+        this.loadProducts();
+      },
+      error: () => this.toastService.error('Unable to delete product.'),
+    });
   }
   openModal(): void {
     this.isModalOpen.set(true);
