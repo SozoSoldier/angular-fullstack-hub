@@ -61,7 +61,7 @@ import { ToastService } from '../../services/toast';
         <div class="mt-4 md:mt-0 md:ml-4 shrink-0">
           <button
             (click)="openModal()"
-            class="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all cursor-pointer"
+            class="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-md transition-all duration-200 cursor-pointer"
           >
             + Add Product
           </button>
@@ -137,13 +137,14 @@ import { ToastService } from '../../services/toast';
                   <button
                     type="button"
                     (click)="cancelEdit()"
-                    class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                    class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors duration-150"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                    [disabled]="editForm.invalid"
+                    class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 select-none hover:bg-indigo-500 hover:shadow-md disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     Save
                   </button>
@@ -269,13 +270,14 @@ import { ToastService } from '../../services/toast';
               <button
                 type="button"
                 (click)="closeModal()"
-                class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold"
+                class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold hover:bg-slate-200 transition-colors duration-150"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+                [disabled]="productForm.invalid"
+                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 select-none hover:bg-indigo-500 hover:shadow-md disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed disabled:shadow-none"
               >
                 Save Item
               </button>
@@ -296,12 +298,10 @@ export class DashboardComponent implements OnInit {
   isModalOpen = signal<boolean>(false);
   editingProductId = signal<number | null>(null);
 
-  // NEW SIGNAL: Track cloud service sleep markers
   isBackendSleeping = signal<boolean>(false);
 
-  // Pagination and search parameters signals
   currentPage = signal<number>(1);
-  pageSize = signal<number>(6); // Limits view layout grid to exactly 6 items max per view
+  pageSize = signal<number>(6);
   totalPages = signal<number>(1);
   searchText = signal<string>('');
 
@@ -321,11 +321,10 @@ export class DashboardComponent implements OnInit {
         next: (result) => {
           this.products.set(result.items);
           this.totalPages.set(result.totalPages || 1);
-          this.isBackendSleeping.set(false); // Clear warning on healthy connection
+          this.isBackendSleeping.set(false);
           this.isLoading.set(false);
         },
         error: (err) => {
-          // FIXED FOR CLOUD: If a 502 Bad Gateway or 0 Connection Timeout triggers, fire alert
           if (err.status === 502 || err.status === 0) {
             this.isBackendSleeping.set(true);
           }
@@ -335,9 +334,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onWakeUpClicked(): void {
-    // Automatically swap loading state animation loops while user initiates wake-up call in secondary tab
     this.isLoading.set(true);
-    // Poll the backend again automatically in 45 seconds to refresh the grid layout
     setTimeout(() => {
       this.loadProducts();
     }, 45000);
@@ -346,7 +343,7 @@ export class DashboardComponent implements OnInit {
   onSearchChange(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.searchText.set(inputElement.value);
-    this.currentPage.set(1); // Force reset view to page 1 whenever searching
+    this.currentPage.set(1);
     this.loadProducts();
   }
 
@@ -355,7 +352,7 @@ export class DashboardComponent implements OnInit {
     this.currentPage.set(page);
     this.loadProducts();
   }
-  // --- Core CRUD synchronization triggers (Refactored to trigger loadProducts on modifications) ---//
+
   initForms(): void {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -367,15 +364,18 @@ export class DashboardComponent implements OnInit {
       price: ['', Validators.required],
     });
   }
+
   startEdit(item: Product): void {
     if (!item.id) return;
     this.editingProductId.set(item.id);
     this.editForm.setValue({ id: item.id, name: item.name, price: item.price });
   }
+
   cancelEdit(): void {
     this.editingProductId.set(null);
     this.editForm.reset();
   }
+
   onUpdate(): void {
     if (this.editForm.invalid) return;
     const id = this.editingProductId();
@@ -389,6 +389,7 @@ export class DashboardComponent implements OnInit {
       error: () => this.toastService.error('Unable to update product.'),
     });
   }
+
   onSubmit(): void {
     if (this.productForm.invalid) return;
     this.productService.createProduct(this.productForm.value).subscribe({
@@ -400,6 +401,7 @@ export class DashboardComponent implements OnInit {
       error: () => this.toastService.error('Unable to add product.'),
     });
   }
+
   onDelete(id: number | undefined): void {
     if (!id || !confirm('Remove item?')) return;
     this.productService.deleteProduct(id).subscribe({
@@ -410,9 +412,11 @@ export class DashboardComponent implements OnInit {
       error: () => this.toastService.error('Unable to delete product.'),
     });
   }
+
   openModal(): void {
     this.isModalOpen.set(true);
   }
+
   closeModal(): void {
     this.isModalOpen.set(false);
     this.productForm.reset();
