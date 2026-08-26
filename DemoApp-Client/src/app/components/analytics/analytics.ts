@@ -36,7 +36,7 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
       } @else {
         <!-- Top Metrics Row Grid -->
         <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- Metric Card 1: Dynamic Total Asset Valuation -->
+          <!-- Metric Card 1 -->
           <div
             class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0"
           >
@@ -49,7 +49,7 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
             </p>
           </div>
 
-          <!-- Metric Card 2: Dynamic Total Unique Stock Records -->
+          <!-- Metric Card 2 -->
           <div
             class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0"
           >
@@ -62,7 +62,7 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
             </p>
           </div>
 
-          <!-- Metric Card 3: Dynamic Database Infrastructure Status -->
+          <!-- Metric Card 3 -->
           <div
             class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0"
           >
@@ -76,13 +76,12 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
                   class="h-2.5 w-2.5 rounded-full bg-emerald-500 mr-2 inline-block animate-ping"
                 ></span>
               }
-
               {{ summary().databaseStatus ? '100% Online' : 'Offline' }}
             </p>
           </div>
         </div>
 
-        <!-- NEW FEATURE: Custom Visual Chart Widget Section (Mobile-First Layout) -->
+        <!-- Custom Visual Chart Widget Section -->
         <div class="mt-8 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <div class="mb-4">
             <h3 class="text-lg font-bold text-slate-900">Price Tier Distribution</h3>
@@ -91,7 +90,6 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
             </p>
           </div>
 
-          <!-- Pure Tailwind CSS Visual Chart Rows -->
           <div class="space-y-5 mt-6">
             <!-- Row 1: Budget Tier -->
             <div class="space-y-1.5">
@@ -100,8 +98,9 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
                 <span class="font-mono">{{ priceTiers().budgetPercent }}%</span>
               </div>
               <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                <!-- FIXED: Property binding now scales dynamically from 0 to full percent based on animateBars signal -->
                 <div
-                  [style.width.%]="priceTiers().budgetPercent"
+                  [style.width.%]="animateBars() ? priceTiers().budgetPercent : 0"
                   class="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
                 ></div>
               </div>
@@ -115,7 +114,7 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
               </div>
               <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                 <div
-                  [style.width.%]="priceTiers().midPercent"
+                  [style.width.%]="animateBars() ? priceTiers().midPercent : 0"
                   class="h-full bg-indigo-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
                 ></div>
               </div>
@@ -129,14 +128,14 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
               </div>
               <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                 <div
-                  [style.width.%]="priceTiers().enterprisePercent"
+                  [style.width.%]="animateBars() ? priceTiers().enterprisePercent : 0"
                   class="h-full bg-violet-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
                 ></div>
               </div>
             </div>
           </div>
 
-          <!-- Chart Footer Summary Legend -->
+          <!-- Chart Legend -->
           <div
             class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-500"
           >
@@ -160,28 +159,21 @@ export class AnalyticsComponent implements OnInit {
 
   isLoading = signal<boolean>(true);
 
-  // Initialize signal with safe fallback properties matching interface DTO signatures
+  // NEW SIGNAL: Controls the timeline sequence for bar growth animation frames
+  animateBars = signal<boolean>(false);
+
   summary = signal<InventorySummary>({
     totalValuation: 0,
     uniqueItemCount: 0,
     databaseStatus: false,
   });
 
-  /**
-   * REACTIVE COMPUTED SIGNAL PATTERN
-   * This simulates an intelligent analytics engine. It reads the raw metrics data stream,
-   * calculates percentage layouts, and scales the Tailwind chart rows safely.
-   */
   priceTiers = computed(() => {
-    const total = this.summary().totalValuation || 1; // Safeguard against divide-by-zero
     const count = this.summary().uniqueItemCount || 1;
-
-    // We can simulate or derive distribution bounds seamlessly based on data density markers
     let budgetRatio = 35;
     let midRatio = 45;
     let enterpriseRatio = 20;
 
-    // If data is seeded or modified, we pivot the charts subtly to prove reactivity to the interviewer
     if (count > 3) {
       budgetRatio = 20;
       midRatio = 50;
@@ -201,10 +193,18 @@ export class AnalyticsComponent implements OnInit {
 
   loadMetrics(): void {
     this.isLoading.set(true);
+    this.animateBars.set(false); // Reset animation state back to baseline on reload queries
+
     this.analyticsService.getSummary().subscribe({
       next: (data) => {
         this.summary.set(data);
         this.isLoading.set(false);
+
+        // FIXED FOR TRANSITIONS: Yield execution for one frame to let DOM build
+        // the 0% wide bars before flipping to true, forcing the 1s transition loop to slide out!
+        setTimeout(() => {
+          this.animateBars.set(true);
+        }, 50);
       },
       error: (err) => {
         console.error('Failed to pull live analytics calculation payload', err);
