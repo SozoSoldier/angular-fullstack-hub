@@ -20,20 +20,21 @@ import { ProductService } from '../../services/product';
       </div>
 
       <!-- Live Dynamic Log Feed Table Container -->
-      <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table class="min-w-[40rem] divide-y divide-slate-200 text-left text-sm">
+      <!-- FIXED: Combined overflow tracking with an absolute full-width table layout -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm w-full">
+        <table class="w-full min-w-[40rem] divide-y divide-slate-200 text-left text-sm table-fixed">
           <thead class="bg-slate-50 font-semibold text-slate-700">
             <tr>
-              <th class="px-6 py-3.5">Timestamp</th>
-              <th class="px-6 py-3.5">Action Code</th>
-              <th class="px-6 py-3.5">Operational Description</th>
-              <th class="px-6 py-3.5">Operator ID</th>
+              <th class="w-1/4 px-6 py-3.5">Timestamp</th>
+              <th class="w-1/5 px-6 py-3.5">Action Code</th>
+              <th class="w-2/5 px-6 py-3.5">Operational Description</th>
+              <th class="w-1/6 px-6 py-3.5">Operator ID</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200 text-slate-600 bg-white">
             @for (log of logs(); track log.id) {
               <tr class="hover:bg-slate-50/80 transition-all">
-                <td class="whitespace-nowrap px-6 py-4 font-mono text-xs text-slate-400">
+                <td class="whitespace-nowrap px-6 py-4 font-mono text-xs text-slate-400 truncate">
                   {{ log.timestamp | date: 'yyyy-MM-dd HH:mm:ss' }}
                 </td>
                 <td class="whitespace-nowrap px-6 py-4">
@@ -50,10 +51,10 @@ import { ProductService } from '../../services/product';
                     {{ log.action }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-slate-700 font-medium max-w-md break-words">
+                <td class="px-6 py-4 text-slate-700 font-medium break-words">
                   {{ log.description }}
                 </td>
-                <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-500">
+                <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-500 truncate">
                   {{ log.performedBy }}
                 </td>
               </tr>
