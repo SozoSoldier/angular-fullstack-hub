@@ -3,13 +3,17 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService, Product } from '../../services/product';
 import { ToastService } from '../../services/toast';
+import { ThemeService } from '../../services/theme';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, CurrencyPipe, ReactiveFormsModule],
   template: `
-    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Inside dashboard.component.ts template -->
+    <main
+      class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300"
+    >
       <!-- NEW FEATURE: Cold Start/Sleeping Backend Warning Callout Banner -->
       @if (isBackendSleeping()) {
         <div
@@ -50,7 +54,7 @@ import { ToastService } from '../../services/toast';
       >
         <div class="min-w-0 flex-1">
           <h2
-            class="text-2xl font-bold leading-normal pb-1 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight"
+            class="text-2xl font-bold leading-normal pb-1 text-slate-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight"
           >
             Inventory Management
           </h2>
@@ -58,7 +62,48 @@ import { ToastService } from '../../services/toast';
             Live catalog synced with the enterprise ASP.NET Core Web API database layer.
           </p>
         </div>
-        <div class="mt-4 md:mt-0 md:ml-4 shrink-0">
+        <div class="mt-4 md:mt-0 md:ml-4 shrink-0 flex items-center space-x-4">
+          <!-- FIXED: Interactive Glassmorphic Dark Mode Theme Toggle Switch Button -->
+          <button
+            (click)="theme.toggleTheme()"
+            class="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 cursor-pointer focus:outline-none flex items-center justify-center"
+            [title]="
+              theme.currentTheme() === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'
+            "
+          >
+            @if (theme.currentTheme() === 'light') {
+              <!-- Modern Minimalist Sun Icon -->
+              <svg
+                class="h-5 w-5 text-amber-500 animate-fade"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M16.243 16.243l.707.707M7.757 7.757l.707-.707M14.25 12a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+                />
+              </svg>
+            } @else {
+              <!-- Sleek Moon Icon -->
+              <svg
+                class="h-5 w-5 text-indigo-400 animate-fade"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+            }
+          </button>
+
           <button
             (click)="openModal()"
             class="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 hover:shadow-md transition-all duration-200 cursor-pointer"
@@ -104,7 +149,7 @@ import { ToastService } from '../../services/toast';
               <form
                 [formGroup]="editForm"
                 (ngSubmit)="onUpdate()"
-                class="relative flex flex-col justify-between rounded-2xl border-2 border-indigo-500 bg-white p-6 shadow-md animate-fade"
+                class="relative flex flex-col justify-between rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/60 p-6 shadow-sm hover:shadow-md dark:hover:border-slate-500 transition-all"
               >
                 <div class="space-y-3">
                   <span
@@ -189,8 +234,10 @@ import { ToastService } from '../../services/toast';
                   </div>
                 </div>
                 <div class="mt-4 flex justify-between items-baseline">
-                  <h3 class="text-lg font-semibold text-slate-900">{{ item.name }}</h3>
-                  <span class="text-2xl font-bold text-indigo-700">{{
+                  <h3 class="text-lg font-semibold text-slate-900 truncate max-w-[70%]">
+                    {{ item.name }}
+                  </h3>
+                  <span class="text-2xl font-bold text-indigo-700 dark:text-indigo-500">{{
                     item.price | currency
                   }}</span>
                 </div>
@@ -211,24 +258,25 @@ import { ToastService } from '../../services/toast';
 
       <!-- NEW FEATURE: Responsive Footer Pagination Controller Module -->
       <div
-        class="mt-8 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between"
+        class="mt-8 flex flex-col gap-4 border-t border-slate-200 dark:border-slate-700 pt-6 sm:flex-row sm:items-center sm:justify-between"
       >
-        <div class="text-sm text-slate-500">
-          Showing page <span class="font-semibold text-slate-900">{{ currentPage() }}</span> of
-          <span class="font-semibold text-slate-900">{{ totalPages() }}</span>
+        <div class="text-sm text-slate-500 dark:text-slate-400">
+          Showing page
+          <span class="font-semibold text-slate-900 dark:text-white">{{ currentPage() }}</span> of
+          <span class="font-semibold text-slate-900 dark:text-white">{{ totalPages() }}</span>
         </div>
         <div class="flex w-full space-x-2 sm:w-auto">
           <button
             (click)="goToPage(currentPage() - 1)"
             [disabled]="currentPage() === 1"
-            class="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer sm:flex-none sm:px-4"
+            class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer sm:flex-none sm:px-4"
           >
             &larr; Previous
           </button>
           <button
             (click)="goToPage(currentPage() + 1)"
             [disabled]="currentPage() >= totalPages()"
-            class="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer sm:flex-none sm:px-4"
+            class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer sm:flex-none sm:px-4"
           >
             Next &rarr;
           </button>
@@ -289,6 +337,7 @@ import { ToastService } from '../../services/toast';
   `,
 })
 export class DashboardComponent implements OnInit {
+  protected theme = inject(ThemeService);
   private productService = inject(ProductService);
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);

@@ -1,2 +1,3 @@
 @import 'tailwindcss';
+@variant dark (&:where(.dark, .dark *));
 @source "./app"; /* Directs Tailwind v4 to look for styles inside the child route subfolders */
