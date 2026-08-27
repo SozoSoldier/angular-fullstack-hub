@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
 import { FooterComponent } from './footer/footer.component';
 import { ToastService } from './services/toast';
+import { SessionTimeoutService } from './services/session-timeout';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -196,35 +198,91 @@ import { ToastService } from './services/toast';
           </div>
         </aside>
 
+        <!-- NEW FEATURE: Authenticated Session Expiration Warning Layout Panel -->
+        <!-- Slides down beautifully from the top of viewport with smooth glassmorphic blur effects -->
+        @if (sessionTimeout.showWarningPanel()) {
+          <div
+            class="fixed top-0 inset-x-0 z-50 p-4 bg-amber-50/95 border-b border-amber-500/30 backdrop-blur-md shadow-xl text-amber-900 animate-fade transition-all duration-300"
+          >
+            <div
+              class="mx-auto max-w-4xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl animate-pulse">🔒</span>
+                <div>
+                  <h4 class="text-sm font-bold tracking-wide">Security Inactivity Warning</h4>
+                  <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                    Your session is expiring due to inactivity. For your protection, you will be
+                    automatically logged out in
+                    <span
+                      class="font-mono font-bold bg-amber-500/10 px-1.5 py-0.5 rounded text-amber-600 text-sm"
+                    >
+                      {{ sessionTimeout.secondsRemaining() }}
+                    </span>
+                    seconds.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-2 shrink-0">
+                <button
+                  (click)="sessionTimeout.extendSession()"
+                  class="rounded-xl bg-amber-600 hover:bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all cursor-pointer"
+                >
+                  Extend Session ⚡
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
         <!-- MAIN DYNAMIC CONTENT ROUTER INJECTOR VIEWPORT -->
         <div class="flex min-h-screen min-w-0 flex-1 flex-col overflow-y-auto">
           <div class="flex-1">
             <router-outlet></router-outlet>
 
-            <!-- NEW FEATURE: Global Floating Toast Notification Container Stack -->
-            <!-- Positioned safely at the bottom right corner of desktops, and full-width top of mobile screens -->
+            <!-- Global Floating Toast Notification Container Stack -->
             <div
               class="fixed z-50 bottom-4 right-4 left-4 sm:left-auto flex flex-col gap-3 max-w-sm w-auto select-none pointer-events-none"
             >
               @for (msg of toastService.toasts(); track msg.id) {
                 <div
                   [ngClass]="{
-                    'border-emerald-200 bg-emerald-50 text-emerald-900': msg.type === 'success',
-                    'border-rose-200 bg-rose-50 text-rose-900': msg.type === 'error',
+                    'border-emerald-500/30 bg-emerald-50/80 text-emerald-900 shadow-emerald-500/5':
+                      msg.type === 'success',
+                    'border-amber-500/30 bg-amber-50/80 text-amber-900 shadow-amber-500/5':
+                      msg.type === 'warning',
+                    'border-rose-500/30 bg-rose-50/80 text-rose-900 shadow-rose-500/5':
+                      msg.type === 'error',
                   }"
-                  class="pointer-events-auto flex items-center justify-between gap-4 p-4 rounded-2xl border bg-white shadow-lg animate-fade transition-all duration-300"
+                  class="pointer-events-auto flex items-center justify-between gap-4 p-4 rounded-2xl border backdrop-blur-md shadow-xl animate-fade transition-all duration-300"
                 >
-                  <div class="flex items-center space-x-2.5">
-                    <span class="text-base">
-                      {{ msg.type === 'success' ? '✅' : '❌' }}
-                    </span>
-                    <p class="text-sm font-semibold tracking-wide">{{ msg.text }}</p>
+                  <div class="flex items-center space-x-3">
+                    <!-- Icon badges customized per message type signature -->
+                    <div
+                      [ngClass]="{
+                        'bg-emerald-500/10 text-emerald-600': msg.type === 'success',
+                        'bg-amber-500/10 text-amber-600': msg.type === 'warning',
+                        'bg-rose-500/10 text-rose-600': msg.type === 'error',
+                      }"
+                      class="h-6 w-6 rounded-lg inline-flex items-center justify-center text-xs shrink-0 font-bold"
+                    >
+                      @if (msg.type === 'success') {
+                        ✓
+                      } @else if (msg.type === 'warning') {
+                        ⚠
+                      } @else {
+                        ✕
+                      }
+                    </div>
+
+                    <p class="text-sm font-semibold tracking-wide leading-snug">{{ msg.text }}</p>
                   </div>
 
                   <!-- Manual Close Button Control Handle -->
                   <button
                     (click)="toastService.removeToast(msg.id)"
-                    class="text-slate-400 hover:text-slate-600 transition-colors font-bold text-base cursor-pointer px-1 focus:outline-none"
+                    class="text-slate-400 hover:text-slate-600 transition-colors font-bold text-base cursor-pointer px-1 focus:outline-none shrink-0"
                   >
                     &times;
                   </button>
@@ -246,11 +304,27 @@ import { ToastService } from './services/toast';
     }
   `,
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   private router = inject(Router);
   protected toastService = inject(ToastService);
+  protected sessionTimeout = inject(SessionTimeoutService);
   mobileMenuOpen = signal(false);
+
+  ngOnInit(): void {
+    // Automatically trigger telemetry tracking when navigating onto secured dashboards
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        const isLoginPage = event.urlAfterRedirects.includes('/login');
+        // If user has advanced past login card, begin tracking metrics immediately
+        this.sessionTimeout.startMonitoring(!isLoginPage);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.sessionTimeout.stopMonitoring();
+  }
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);

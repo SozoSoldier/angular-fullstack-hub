@@ -327,6 +327,10 @@ export class DashboardComponent implements OnInit {
         error: (err) => {
           if (err.status === 502 || err.status === 0) {
             this.isBackendSleeping.set(true);
+            // NEW: Flashes our modern transparent amber warning popup instantly
+            this.toastService.warning('Backend engine is sleeping. Initiating cold-start.');
+          } else {
+            this.toastService.error('Failed to communicate with inventory servers.');
           }
           this.isLoading.set(false);
         },
