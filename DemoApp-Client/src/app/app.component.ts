@@ -3,21 +3,13 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth';
 import { FooterComponent } from './footer/footer.component';
-import { ToastComponent } from './toast/toast.component';
+import { ToastService } from './services/toast';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    FooterComponent,
-    ToastComponent,
-  ],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, FooterComponent],
   template: `
-    <app-toast></app-toast>
     <!-- 1. Check if the user is logged in using our authentication signal -->
     @if (authService.isAuthenticated()) {
       <div class="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
@@ -208,6 +200,37 @@ import { ToastComponent } from './toast/toast.component';
         <div class="flex min-h-screen min-w-0 flex-1 flex-col overflow-y-auto">
           <div class="flex-1">
             <router-outlet></router-outlet>
+
+            <!-- NEW FEATURE: Global Floating Toast Notification Container Stack -->
+            <!-- Positioned safely at the bottom right corner of desktops, and full-width top of mobile screens -->
+            <div
+              class="fixed z-50 bottom-4 right-4 left-4 sm:left-auto flex flex-col gap-3 max-w-sm w-auto select-none pointer-events-none"
+            >
+              @for (msg of toastService.toasts(); track msg.id) {
+                <div
+                  [ngClass]="{
+                    'border-emerald-200 bg-emerald-50 text-emerald-900': msg.type === 'success',
+                    'border-rose-200 bg-rose-50 text-rose-900': msg.type === 'error',
+                  }"
+                  class="pointer-events-auto flex items-center justify-between gap-4 p-4 rounded-2xl border bg-white shadow-lg animate-fade transition-all duration-300"
+                >
+                  <div class="flex items-center space-x-2.5">
+                    <span class="text-base">
+                      {{ msg.type === 'success' ? '✅' : '❌' }}
+                    </span>
+                    <p class="text-sm font-semibold tracking-wide">{{ msg.text }}</p>
+                  </div>
+
+                  <!-- Manual Close Button Control Handle -->
+                  <button
+                    (click)="toastService.removeToast(msg.id)"
+                    class="text-slate-400 hover:text-slate-600 transition-colors font-bold text-base cursor-pointer px-1 focus:outline-none"
+                  >
+                    &times;
+                  </button>
+                </div>
+              }
+            </div>
           </div>
           <app-footer></app-footer>
         </div>
@@ -226,6 +249,7 @@ import { ToastComponent } from './toast/toast.component';
 export class AppComponent {
   authService = inject(AuthService);
   private router = inject(Router);
+  protected toastService = inject(ToastService);
   mobileMenuOpen = signal(false);
 
   closeMobileMenu(): void {
