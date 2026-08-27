@@ -101,4 +101,19 @@ public class ProductsController : ControllerBase
         var logs = await _repo.GetAuditLogsAsync();
         return Ok(logs);
     }
+
+    [HttpDelete("audit-logs")]
+    public async Task<IActionResult> ClearLogs()
+    {
+        await _repo.ClearAuditLogsAsync();
+
+        // Write a fresh baseline entry to log the purge action itself!
+        await _repo.AddAuditLogAsync(
+            "LOGS_CLEARED",
+            "Administrative telemetry database clearance executed successfully.",
+            "Admin User"
+        );
+
+        return NoContent(); // 204 No Content confirms success
+    }
 }

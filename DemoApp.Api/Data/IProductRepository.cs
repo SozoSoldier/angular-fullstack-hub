@@ -9,5 +9,6 @@ public interface IProductRepository
     Task UpdateAsync(Product product);
     Task AddAuditLogAsync(string action, string description, string user);
     Task<List<AuditLog>> GetAuditLogsAsync(); // To pull logs out to the UI later
+    Task ClearAuditLogsAsync();
     Task SaveChangesAsync();
 }

@@ -36,39 +36,99 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
       } @else {
         <!-- Top Metrics Row Grid -->
         <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- Metric Card 1 -->
+          <!-- Metric Card 1: Dynamic Total Asset Valuation with Info Tooltip -->
           <div
-            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0"
+            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-visible relative min-w-0 transition-all hover:shadow-md"
           >
-            <p class="text-sm font-medium text-slate-500 truncate">Total Asset Valuation</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 min-w-0">
+                <p class="text-sm font-medium text-slate-500 truncate">Total Asset Valuation</p>
+                <!-- Tooltip Trigger Button -->
+                <button
+                  (click)="toggleTooltip('valuation', $event)"
+                  class="text-slate-400 hover:text-indigo-600 font-medium text-xs rounded-full h-4 w-4 border border-slate-300 inline-flex items-center justify-center cursor-pointer transition-colors focus:outline-none"
+                >
+                  ?
+                </button>
+              </div>
+
+              <span
+                [ngClass]="valuationTrend().bgClass"
+                class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold select-none border transition-all duration-300"
+              >
+                {{ valuationTrend().icon }} {{ valuationTrend().label }}
+              </span>
+            </div>
             <p
-              class="mt-2 text-2xl sm:text-3xl font-semibold text-indigo-600 tracking-tight break-all truncate"
+              class="mt-4 text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight break-all truncate"
               [title]="summary().totalValuation | currency"
             >
               {{ summary().totalValuation | currency }}
             </p>
+
+            <!-- Custom Tooltip Bubble Element -->
+            @if (showValuationTooltip()) {
+              <div
+                class="absolute z-30 top-12 left-6 right-6 p-3 rounded-xl border border-indigo-100 bg-indigo-900 text-white text-xs shadow-xl animate-fade"
+              >
+                <div class="font-semibold mb-1">About Total Valuation:</div>
+                The cumulative retail sum value calculated from all product price parameters
+                actively deployed inside the C# Web API database layer.
+              </div>
+            }
           </div>
 
-          <!-- Metric Card 2 -->
+          <!-- Metric Card 2: Dynamic Total Unique Stock Records with Info Tooltip -->
           <div
-            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0"
+            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-visible relative min-w-0 transition-all hover:shadow-md"
           >
-            <p class="text-sm font-medium text-slate-500 truncate">Unique Items Tracked</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5 min-w-0">
+                <p class="text-sm font-medium text-slate-500 truncate">Unique Items Tracked</p>
+                <!-- Tooltip Trigger Button -->
+                <button
+                  (click)="toggleTooltip('records', $event)"
+                  class="text-slate-400 hover:text-indigo-600 font-medium text-xs rounded-full h-4 w-4 border border-slate-300 inline-flex items-center justify-center cursor-pointer transition-colors focus:outline-none"
+                >
+                  ?
+                </button>
+              </div>
+
+              <span
+                [ngClass]="catalogVelocity().bgClass"
+                class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold select-none border transition-all duration-300"
+              >
+                {{ catalogVelocity().icon }} {{ catalogVelocity().label }}
+              </span>
+            </div>
             <p
-              class="mt-2 text-2xl sm:text-3xl font-semibold text-amber-600 tracking-tight break-all truncate"
+              class="mt-4 text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight break-all truncate"
             >
               {{ summary().uniqueItemCount }}
               {{ summary().uniqueItemCount === 1 ? 'Product' : 'Products' }}
             </p>
+
+            <!-- Custom Tooltip Bubble Element -->
+            @if (showRecordsTooltip()) {
+              <div
+                class="absolute z-30 top-12 left-6 right-6 p-3 rounded-xl border border-indigo-100 bg-indigo-900 text-white text-xs shadow-xl animate-fade"
+              >
+                <div class="font-semibold mb-1">About Unique Items:</div>
+                The total number of individual product SKUs tracked. Excludes records flagged as
+                logically soft-deleted within the database layer.
+              </div>
+            }
           </div>
 
-          <!-- Metric Card 3 -->
+          <!-- Metric Card 3: Dynamic Database Infrastructure Status -->
           <div
-            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0"
+            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden min-w-0 transition-all hover:shadow-md"
           >
-            <p class="text-sm font-medium text-slate-500 truncate">Database Connectivity</p>
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-medium text-slate-500 truncate">Database Connectivity</p>
+            </div>
             <p
-              class="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight break-all truncate flex items-center"
+              class="mt-4 text-2xl sm:text-3xl font-semibold tracking-tight break-all truncate flex items-center"
               [ngClass]="summary().databaseStatus ? 'text-emerald-600' : 'text-rose-600'"
             >
               @if (summary().databaseStatus) {
@@ -98,7 +158,6 @@ import { AnalyticsService, InventorySummary } from '../../services/analytics';
                 <span class="font-mono">{{ priceTiers().budgetPercent }}%</span>
               </div>
               <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                <!-- FIXED: Property binding now scales dynamically from 0 to full percent based on animateBars signal -->
                 <div
                   [style.width.%]="animateBars() ? priceTiers().budgetPercent : 0"
                   class="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
@@ -158,9 +217,11 @@ export class AnalyticsComponent implements OnInit {
   private analyticsService = inject(AnalyticsService);
 
   isLoading = signal<boolean>(true);
-
-  // NEW SIGNAL: Controls the timeline sequence for bar growth animation frames
   animateBars = signal<boolean>(false);
+
+  // NEW SIGNALS: Independent click states for responsive tooltips
+  showValuationTooltip = signal<boolean>(false);
+  showRecordsTooltip = signal<boolean>(false);
 
   summary = signal<InventorySummary>({
     totalValuation: 0,
@@ -168,40 +229,58 @@ export class AnalyticsComponent implements OnInit {
     databaseStatus: false,
   });
 
+  valuationTrend = computed(() => {
+    const valuation = this.summary().totalValuation;
+    if (valuation === 0) {
+      return { label: 'Static', icon: '•', bgClass: 'bg-slate-50 text-slate-600 border-slate-200' };
+    }
+    if (valuation > 600) {
+      return {
+        label: '+14.2% Up',
+        icon: '▲',
+        bgClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+      };
+    }
+    return { label: 'Optimal', icon: '✓', bgClass: 'bg-sky-50 text-sky-700 border-sky-200/60' };
+  });
+  catalogVelocity = computed(() => {
+    const count = this.summary().uniqueItemCount;
+    if (count <= 2) {
+      return {
+        label: 'Low Stock',
+        icon: '⚠',
+        bgClass: 'bg-amber-50 text-amber-700 border-amber-200/60',
+      };
+    }
+    return {
+      label: 'Active',
+      icon: '⚡',
+      bgClass: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
+    };
+  });
   priceTiers = computed(() => {
     const count = this.summary().uniqueItemCount || 1;
     let budgetRatio = 35;
     let midRatio = 45;
     let enterpriseRatio = 20;
-
     if (count > 3) {
       budgetRatio = 20;
       midRatio = 50;
       enterpriseRatio = 30;
     }
-
-    return {
-      budgetPercent: budgetRatio,
-      midPercent: midRatio,
-      enterprisePercent: enterpriseRatio,
-    };
+    return { budgetPercent: budgetRatio, midPercent: midRatio, enterprisePercent: enterpriseRatio };
   });
-
   ngOnInit(): void {
     this.loadMetrics();
+    this.setupGlobalClickCloser();
   }
-
   loadMetrics(): void {
     this.isLoading.set(true);
-    this.animateBars.set(false); // Reset animation state back to baseline on reload queries
-
+    this.animateBars.set(false);
     this.analyticsService.getSummary().subscribe({
       next: (data) => {
         this.summary.set(data);
         this.isLoading.set(false);
-
-        // FIXED FOR TRANSITIONS: Yield execution for one frame to let DOM build
-        // the 0% wide bars before flipping to true, forcing the 1s transition loop to slide out!
         setTimeout(() => {
           this.animateBars.set(true);
         }, 50);
@@ -210,6 +289,25 @@ export class AnalyticsComponent implements OnInit {
         console.error('Failed to pull live analytics calculation payload', err);
         this.isLoading.set(false);
       },
+    });
+  }
+  /**Toggles the target tooltip signal state while automatically closing alternative bubbles.Uses stopPropagation so the event doesn't immediately bubble up and trigger our global closer.*/ toggleTooltip(
+    type: 'valuation' | 'records',
+    event: Event,
+  ): void {
+    event.stopPropagation();
+    if (type === 'valuation') {
+      this.showValuationTooltip.set(!this.showValuationTooltip());
+      this.showRecordsTooltip.set(false);
+    } else {
+      this.showRecordsTooltip.set(!this.showRecordsTooltip());
+      this.showValuationTooltip.set(false);
+    }
+  }
+  /**DEFENSIVE UX PATTERN: Global Document Click ListenerAutomatically collapses any active tooltip bubbles if the user taps anywhere else on the screen.*/ private setupGlobalClickCloser(): void {
+    document.addEventListener('click', () => {
+      this.showValuationTooltip.set(false);
+      this.showRecordsTooltip.set(false);
     });
   }
 }

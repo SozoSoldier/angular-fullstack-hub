@@ -59,4 +59,8 @@ export class ProductService {
   updateProduct(id: number, product: Product): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, product);
   }
+
+  clearAuditLogs(): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/audit-logs`);
+  }
 }

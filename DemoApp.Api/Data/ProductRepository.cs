@@ -70,6 +70,13 @@ public class ProductRepository : IProductRepository
         return await _context.AuditLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
     }
 
+    public async Task ClearAuditLogsAsync()
+    {
+        // Removes all entries from the physical database table array
+        _context.AuditLogs.RemoveRange(_context.AuditLogs);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
